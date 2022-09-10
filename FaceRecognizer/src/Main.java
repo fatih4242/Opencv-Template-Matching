@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+
 import org.opencv.core.Core;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
@@ -22,6 +23,7 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
@@ -60,26 +62,7 @@ public class Main extends JFrame{
 		cameraScreen.setSize(new Dimension(600,600));;
 		cameraScreen.setLocation(width / 4, height / 4);
 		add(cameraScreen);
-		
-		/*JButton btn = new JButton("Begin Detect");
-		btn.setBounds(0,0, 150, 50);
-		add(btn);
-		
-		btn.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!detectFace) {
-					detectFace = true;
-					btn.setText("Stop Detect");
-				}else {
-					detectFace = false;
-					btn.setText("Begin Detect");
-				}
-				
-			}
-		});
-		*/
+	
 	
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,7 +85,7 @@ public class Main extends JFrame{
 						
 						@Override
 						public void run() {
-							// TODO Auto-generated method stub
+						
 							main.startCamera();
 						}
 					}).start();
@@ -133,22 +116,30 @@ public class Main extends JFrame{
 				MatOfRect faceDetection = new MatOfRect();
 				cc.detectMultiScale(img, faceDetection);
 				
-				/*dETECT FACE CAPTURE IMAGE
-				  if (faceDetection.toArray().length == 1) {
-					String name = JOptionPane.showInputDialog(this, "Enter Image Name");
-					if(name == null){
-						name = new SimpleDateFormat("yyyy-mm-dd-hh-mm-ss").format(new Date());
-					}
-					
-					Imgcodecs.imwrite("images/"+ name + ".jpg",img);
-				}*/
-				//System.out.println(String.format("Detected Faces: %d", faceDetection.toArray().length));//true
 				
-				
+				Rect rectCrop = null;
 				for(Rect rect : faceDetection.toArray()) {
 					Imgproc.rectangle(img, new Point(rect.x, rect.y),new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0,0,255),3);
-					
+					 rectCrop = new Rect(rect.x, rect.y, rect.width, rect.height);
 				}
+				Mat mat = new Mat(img, rectCrop);
+				Mat grayScaleImgMat = new Mat();
+				
+				Imgproc.cvtColor(mat, grayScaleImgMat, Imgproc.COLOR_RGB2GRAY);	
+				Size sz = new Size(100,100);
+				
+				Mat resizedImg = new Mat();
+				Imgproc.resize( grayScaleImgMat, resizedImg, sz);
+				Imgcodecs.imwrite("images/Hello.jpg", resizedImg);//saving cropped Image
+				
+
+		         
+		
+		        
+
+		       
+		        //faceRecognizer.predict(resizedImg, intPointer, doublePointer);
+				
 				final MatOfByte buf = new MatOfByte();
 				Imgcodecs.imencode(".jpg", img, buf);
 				
@@ -185,5 +176,3 @@ public class Main extends JFrame{
 
 
 }
-
-
